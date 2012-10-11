@@ -1,57 +1,194 @@
 #ifndef TIMESPAN_H_
 #define TIMESPAN_H_
 
-class Timespan {
+namespace
+{
+    static const long long TicksPerDay =  86400000000LL;
+    static const long long TicksPerHour =  3600000000LL;
+    static const long long TicksPerMinute =  60000000LL;
+    static const long long TicksPerSecond =   1000000LL;
+    static const long long TicksPerMillisecond = 1000LL;
+    static const long long TicksPerMicrosecond =    1LL;
+
+    static const long long UnixEpoch = 62135596800000000LL;
+
+    static const long long MaxValueTicks = 315537897599999999LL;
+
+    // 1582-Oct-15
+    static const long long GregorianStart = 49916304000000000LL;
+}
+
+class TimeSpan
+{
 public:
-    Timespan();
-    Timespan(const unsigned int days, const unsigned int hours,
-            const unsigned int minutes, const double seconds);
-    Timespan(const double b);
-    Timespan(const Timespan& b);
-    virtual ~Timespan(void);
+    TimeSpan(long long ticks)
+        : m_ticks(ticks)
+    {
+    }
 
-    void SetValue(const unsigned int days, const unsigned int hours,
-            const unsigned int minutes, const double seconds);
+    TimeSpan(int hours, int minutes, int seconds)
+    {
+        CalculateTicks(0, hours, minutes, seconds, 0);
+    }
 
-    void AddDays(const unsigned int days);
-    void AddHours(const unsigned int hours);
-    void AddMinutes(const unsigned int minutes);
-    void AddSeconds(const double seconds);
+    TimeSpan(int days, int hours, int minutes, int seconds)
+    {
+        CalculateTicks(days, hours, minutes, seconds, 0);
+    }
 
-    double GetTotalDays() const;
-    double GetTotalHours() const;
-    double GetTotalMinutes() const;
-    double GetTotalSeconds() const;
+    TimeSpan(int days, int hours, int minutes, int seconds, int microseconds)
+    {
+        CalculateTicks(days, hours, minutes, seconds, microseconds);
+    }
 
-    // assignment
-    Timespan & operator=(const Timespan& b);
-    // arithmetic
-    Timespan operator+(const Timespan& b) const;
-    Timespan operator-(const Timespan& b) const;
-    Timespan operator/(const double b) const;
-    Timespan operator*(const double b) const;
-    // compound arithmetic
-    Timespan & operator+=(const Timespan& b);
-    Timespan & operator-=(const Timespan& b);
-    Timespan & operator/=(const double b);
-    Timespan & operator*=(const double b);
-    // comparison
-    bool operator==(const Timespan& b) const;
-    bool operator!=(const Timespan& b) const;
-    bool operator>(const Timespan& b) const;
-    bool operator<(const Timespan& b) const;
-    bool operator>=(const Timespan& b) const;
-    bool operator<=(const Timespan& b) const;
+    TimeSpan Add(const TimeSpan& ts) const
+    {
+        return TimeSpan(m_ticks + ts.m_ticks);
+    }
+    
+    TimeSpan Subtract(const TimeSpan& ts) const
+    {
+        return TimeSpan(m_ticks - ts.m_ticks);
+    }
 
-    friend double& operator +=(double& a, const Timespan& b);
-    friend double& operator -=(double& a, const Timespan& b);
+    int Compare(const TimeSpan& ts) const
+    {
+        int ret = 0;
+
+        if (m_ticks < ts.m_ticks)
+        {
+            ret = -1;
+        }
+        if (m_ticks < ts.m_ticks)
+        {
+            ret = 1;
+        }
+        return ret;
+    }
+
+    bool Equals(const TimeSpan& ts) const
+    {
+        return m_ticks == ts.m_ticks;
+    }
+
+    int Days()
+    {
+        return m_ticks / TicksPerDay;
+    }
+
+    int Hours()
+    {
+        return (m_ticks % TicksPerDay / TicksPerHour);
+    }
+
+    int Minutes() const
+    {
+        return (m_ticks % TicksPerHour / TicksPerMinute);
+    }
+
+    int Seconds() const
+    {
+        return (m_ticks % TicksPerMinute / TicksPerSecond);
+    }
+
+    int Milliseconds() const
+    {
+        return (m_ticks % TicksPerSecond / TicksPerMillisecond);
+    }
+    
+    int Microseconds() const
+    {
+        return (m_ticks % TicksPerSecond / TicksPerMicrosecond);
+    }
+
+    long long Ticks() const
+    {
+        return m_ticks;
+    }
+
+    double TotalDays() const
+    {
+        return m_ticks / static_cast<double>(TicksPerDay);
+    }
+
+    double TotalHours() const
+    {
+        return m_ticks / static_cast<double>(TicksPerHour);
+    }
+
+    double TotalMinutes() const
+    {
+        return m_ticks / static_cast<double>(TicksPerMinute);
+    }
+
+    double TotalSeconds() const
+    {
+        return m_ticks / static_cast<double>(TicksPerSecond);
+    }
+    
+    double TotalMilliseconds() const
+    {
+        return m_ticks / static_cast<double>(TicksPerMillisecond);
+    }
+    
+    double TotalMicroseconds() const
+    {
+        return m_ticks / static_cast<double>(TicksPerMicrosecond);
+    }
 
 private:
-    /*
-     * stores value in minutes
-     */
-    double time_span_;
+    long long m_ticks;
+
+    void CalculateTicks(int days,
+            int hours,
+            int minutes,
+            int seconds,
+            int microseconds)
+    {
+        m_ticks = days * TicksPerDay +
+            (hours * 3600LL + minutes * 60LL + seconds) * TicksPerSecond + 
+            microseconds * TicksPerMicrosecond;
+    }
 };
 
-#endif
+inline TimeSpan operator+(const TimeSpan& ts1, const TimeSpan& ts2)
+{
+    return ts1.Add(ts2);
+}
 
+inline TimeSpan operator-(const TimeSpan& ts1, const TimeSpan& ts2)
+{
+    return ts1.Subtract(ts2);
+}
+
+inline bool operator==(const TimeSpan& ts1, TimeSpan& ts2)
+{
+    return ts1.Equals(ts2);
+}
+
+inline bool operator>(const TimeSpan& ts1, const TimeSpan& ts2)
+{
+    return (ts1.Compare(ts2) > 0);
+}
+
+inline bool operator>=(const TimeSpan& ts1, const TimeSpan& ts2)
+{
+    return (ts1.Compare(ts2) >= 0);
+}
+
+inline bool operator!=(const TimeSpan& ts1, const TimeSpan& ts2)
+{
+    return !ts1.Equals(ts2);
+}
+
+inline bool operator<(const TimeSpan& ts1, const TimeSpan& ts2)
+{
+    return (ts1.Compare(ts2) < 0);
+}
+
+inline bool operator<=(const TimeSpan& ts1, const TimeSpan& ts2)
+{
+    return (ts1.Compare(ts2) <= 0);
+}
+
+#endif
