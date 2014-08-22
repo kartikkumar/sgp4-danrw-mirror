@@ -1,0 +1,10 @@
+# Build system
+Makefile
+*.a
+*.o
+*.log
+*.status
+.deps/
+passpredict
+runtest
+sattrack
