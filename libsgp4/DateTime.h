@@ -24,6 +24,16 @@
 #include "TimeSpan.h"
 #include "Util.h"
 
+#ifdef __MACH__
+  #include <mach/clock.h>
+  #include <mach/mach.h>
+#endif
+
+// Get current, absolute UTC time.
+// Includes a workaround for Mac OS X that doesn't have clock_gettime.
+// Ref: https://gist.github.com/jbenet/1087739.
+int current_utc_time(struct timespec *ts);
+
 namespace
 {
     static int daysInMonth[2][13] = {
@@ -141,7 +151,7 @@ public:
         DateTime dt;
         struct timespec ts;
 
-        if (clock_gettime(CLOCK_REALTIME, &ts) == 0)
+        if (current_utc_time(&ts) == 0)
         {
             if (microseconds)
             {
