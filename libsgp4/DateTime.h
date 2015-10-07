@@ -79,7 +79,7 @@ public:
      */
     DateTime(int year, double doy)
     {
-        m_encoded = TimeSpan(static_cast<long long int>(AbsoluteDays(year, doy) * TicksPerDay)).Ticks();
+        m_encoded = static_cast<unsigned long long>(TimeSpan(static_cast<long long int>(AbsoluteDays(year, doy) * TicksPerDay)).Ticks());
     }
 
     /**
@@ -133,12 +133,12 @@ public:
         {
             throw 1;
         }
-        m_encoded = TimeSpan(
+        m_encoded = static_cast<unsigned long long>(TimeSpan(
                 AbsoluteDays(year, month, day),
                 hour,
                 minute,
                 second,
-                microsecond).Ticks();
+                microsecond).Ticks());
     }
 
     /**
@@ -155,14 +155,14 @@ public:
         {
             if (microseconds)
             {
-                dt = DateTime(UnixEpoch
+                dt = DateTime(static_cast<unsigned long long>(UnixEpoch
                     + ts.tv_sec * TicksPerSecond
-                    + ts.tv_nsec / 1000LL * TicksPerMicrosecond);
+                    + ts.tv_nsec / 1000LL * TicksPerMicrosecond));
             }
             else
             {
-                dt = DateTime(UnixEpoch
-                    + ts.tv_sec * TicksPerSecond);
+                dt = DateTime(static_cast<unsigned long long>(UnixEpoch
+                    + ts.tv_sec * TicksPerSecond));
             }
         }
         else
@@ -219,13 +219,13 @@ public:
                 valid = false;
             }
         }
-        else 
+        else
         {
             valid = false;
         }
         return valid;
     }
-    
+
     /**
      * Check whether the year/month/day is valid
      * @param[in] year the year to check
@@ -262,7 +262,7 @@ public:
         {
             throw 1;
         }
-        
+
         const int* daysInMonthPtr;
 
         if (IsLeapYear(year))
@@ -457,7 +457,7 @@ public:
 
     DateTime AddTicks(long long ticks) const
     {
-        return DateTime(m_encoded + ticks);
+        return DateTime(m_encoded + static_cast<unsigned long long>(ticks));
     }
 
     /**
@@ -466,13 +466,13 @@ public:
      */
     long long Ticks() const
     {
-        return m_encoded;
+        return static_cast<long long>(m_encoded);
     }
 
     void FromTicks(int& year, int& month, int& day) const
     {
         int totalDays = static_cast<int>(m_encoded / TicksPerDay);
-        
+
         /*
          * number of 400 year cycles
          */
@@ -512,7 +512,7 @@ public:
          * find year
          */
         year = (num400 * 400) + (num100 * 100) + (num4 * 4) + num1 + 1;
-        
+
         /*
          * convert day of year to month/day
          */
@@ -672,7 +672,7 @@ inline DateTime operator+(const DateTime& dt, TimeSpan ts)
            throw 1;
     }
 
-    return DateTime(res);
+    return DateTime(static_cast<unsigned long long>(res));
 }
 
 inline DateTime operator-(const DateTime& dt, const TimeSpan& ts)
@@ -683,7 +683,7 @@ inline DateTime operator-(const DateTime& dt, const TimeSpan& ts)
         throw 1;
     }
 
-    return DateTime(res);
+    return DateTime(static_cast<unsigned long long>(res));
 }
 
 inline TimeSpan operator-(const DateTime& dt1, const DateTime& dt2)

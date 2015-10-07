@@ -74,7 +74,7 @@ public:
     {
         return TimeSpan(m_ticks + ts.m_ticks);
     }
-    
+
     TimeSpan Subtract(const TimeSpan& ts) const
     {
         return TimeSpan(m_ticks - ts.m_ticks);
@@ -124,7 +124,7 @@ public:
     {
         return static_cast<int>(m_ticks % TicksPerSecond / TicksPerMillisecond);
     }
-    
+
     int Microseconds() const
     {
         return static_cast<int>(m_ticks % TicksPerSecond / TicksPerMicrosecond);
@@ -154,12 +154,12 @@ public:
     {
         return static_cast<double>(m_ticks) / TicksPerSecond;
     }
-    
+
     double TotalMilliseconds() const
     {
         return static_cast<double>(m_ticks) / TicksPerMillisecond;
     }
-    
+
     double TotalMicroseconds() const
     {
         return static_cast<double>(m_ticks) / TicksPerMicrosecond;
@@ -170,7 +170,7 @@ public:
         std::stringstream ss;
 
         ss << std::right << std::setfill('0');
-        
+
         if (m_ticks < 0)
         {
             ss << '-';
@@ -203,7 +203,7 @@ private:
             int microseconds)
     {
         m_ticks = days * TicksPerDay +
-            (hours * 3600LL + minutes * 60LL + seconds) * TicksPerSecond + 
+            (hours * 3600LL + minutes * 60LL + seconds) * TicksPerSecond +
             microseconds * TicksPerMicrosecond;
     }
 };
